@@ -10,6 +10,6 @@
 
 from pocketsphinx import AudioFile
 audio = AudioFile("audio/1.wav", keyphrase='uh', kws_threshold=1e-1)
+output = open("output.txt", mode="w")
 for phrase in audio: 
-    print(phrase.segments(detailed=True))
-    print(audio.prob)
+    print(phrase.segments(detailed=True), file=output)
