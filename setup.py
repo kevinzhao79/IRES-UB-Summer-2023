@@ -1,11 +1,11 @@
-#import WordObj
+#imports
 import pocketsphinx as ps
 from pocketsphinx import AudioFile
 import collections
-import word
-from word import word
+import Word
+from Word import Word
 
-class setup:
+class Setup:
 
     #timestamped transcription in PS list
     ts_transcription = None
@@ -17,23 +17,14 @@ class setup:
     def transcribe(audio):
 
         for phrase in audio:
-            setup.ts_transcription = phrase.segments(detailed=True)
+            Setup.ts_transcription = phrase.segments(detailed=True)
 
     """ partitions transcription list to separate each sound
         creates an object for the sound (Word)
         puts each object into a linked list """
     def separate(word_list):
 
-        for unit in setup.ts_transcription:
+        for unit in Setup.ts_transcription:
 
-            new_word = word(unit[0], None, unit[2], unit[3], unit[1])
-            setup.word_list.append(new_word)
-
-
-def main():
-    audio = AudioFile("pocketsphinx/audio/1.wav")
-    setup.transcribe(audio)
-    setup.separate(setup.word_list)
-    print(str(setup.word_list))
-
-main()
+            new_word = Word(unit[0], None, unit[2], unit[3], unit[1])
+            Setup.word_list.append(new_word)
