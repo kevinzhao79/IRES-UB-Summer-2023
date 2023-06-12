@@ -26,5 +26,5 @@ class Setup:
 
         for unit in Setup.ts_transcription:
 
-            new_word = Word(unit[0], None, unit[2], unit[3], unit[1])
+            new_word = Word(unit[0], unit[2], unit[3], unit[1])
             Setup.word_list.append(new_word)
