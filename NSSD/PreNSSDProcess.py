@@ -34,7 +34,7 @@ class PreNSSDProcess:
             new_word = Word(unit[0], unit[2], unit[3], unit[1])
             self.nss_list.append(new_word)
 
-     """determines total num of pauses and increments numpause"""
+     """determines total num of pauses within the original transcription"""
      def detect_pause(self, word_list):
         for unit in word_list:
           if unit.name == "<sil>":

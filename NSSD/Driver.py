@@ -10,25 +10,36 @@ import PreNSSDProcess as PreNSSDProcess
 from PreNSSDProcess import PreNSSDProcess
 
 """
-The driver class for the baseline NSSD program. 
-The Command Line Arguments for this program are as follows:
+The Driver class, responsible for initializing the backend classes (Setup, PreNSSDPRocess),
+checking user-inputted arguments, and abstracting the process to simplify user interaction.
+
+The Command Line Arguments for this program are detailed as follows:
 
 python3 Driver.py [relative path of audio file] [keyword 1] [keyword 2] ... [keyword n] [keyword_threshold]
 """
 
 class Driver:
 
+    #Setup class object
     setup = None
-    pre = None
-    file = None
-    nss = []
-    threshold = None
 
+    #PreNSSDProcess class object
+    pre = None
+
+    #Audio file relative path
+    file = None
+
+    #List of NSS keywords to check
+    nss = []
+
+    #NSS threshold to check for
+    threshold = None
 
     def __init__(self, setup, pre):
         self.setup = setup
         self.pre = pre
 
+    #checks to ensure that there are the correct number of CLA
     def check_argv(self):
         if len(sys.argv) < 4:
             print("Error: Incorrect number of Command-Line Arguments: Should be at least 4, but was " + str(len(sys.argv)))
@@ -110,15 +121,4 @@ def main():
     driver = Driver(Setup, PreNSSDProcess)
     driver.driver_handler()
 
-
-    
-
-    
-    
-    
-    
-
-    
-
-     
 main()
