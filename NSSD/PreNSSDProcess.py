@@ -1,5 +1,4 @@
 import pocketsphinx as ps
-from pocketsphinx import AudioFile
 import Setup as Setup
 import Word as Word
 from Word import Word
@@ -7,6 +6,10 @@ from Word import Word
 
 """Completes requirements for pre-NSSD processing, including detecting basic NSS's and pauses"""
 class PreNSSDProcess:
+
+     config = None
+     decoder = None
+     segmenter = None
     
      #number of detectable pauses within the original transcription
      num_pause = 0
@@ -29,11 +32,25 @@ class PreNSSDProcess:
      def __init__(self, word_list):
          self.word_list = word_list
 
-     def wordify(self):
-          for unit in self.nss_transcription:
-            new_word = Word(unit[0], unit[2], unit[3], unit[1])
-            self.nss_list.append(new_word)
+     def ps_settings(self, nss, threshold):
+          self.config = ps.Config(
+               fdict='nssd-dict.dict',
+               silprob=0.00001,
+               fillprob=1e-20,
+               kws = nss,
+               kws_delay=20,
+               kws_threshold = threshold
+          )
+          self.decoder = ps.Decoder(self.config)
+          self.segmenter = ps.Segmenter(sample_rate=16000, frame_length=0.01)
 
+     def wordify(self):
+
+          if self.decoder.hyp() != None:
+               for seg in self.decoder.seg():
+                    new_word = Word(seg.word, seg.start_frame, seg.end_frame, seg.prob)
+                    self.nss_list.append(new_word)
+            
      """determines total num of pauses within the original transcription"""
      def detect_pause(self, word_list):
         for unit in word_list:
@@ -44,12 +61,26 @@ class PreNSSDProcess:
 
      #finds all potential instances of NSS in transcription, including sounds within words
      def find_all(self, file, nss, threshold):
-         audio = AudioFile(file, keyphrase=nss, kws_threshold=threshold)
-         for phrase in audio:
-          self.nss_transcription = phrase.segments(detailed=True)
+
+          self.ps_settings(nss, threshold)
+
+          self.decoder.add_kws('nssd', nss)
+          self.decoder.activate_search('nssd')
+
+          with open(file, 'rb') as f:
+               self.decoder.start_utt()  # Begin utterance
+               while True:
+                    buf = f.read(1024)
+                    if buf:
+                         self.decoder.process_raw(buf, False, False)
+                    else:
+                         break
+               self.decoder.end_utt()  # End utterance
+
+          #self.nss_transcription = self.segmenter.segment(self.nss_transcription)
 
          #turns segmented output into list form
-         self.wordify()
+          self.wordify()
 
          
      #filters thru find_all() output to determine whether the NSS was found within a word    

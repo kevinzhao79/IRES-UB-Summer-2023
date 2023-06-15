@@ -15,10 +15,13 @@ checking user-inputted arguments, and abstracting the process to simplify user i
 
 The Command Line Arguments for this program are detailed as follows:
 
-python3 Driver.py [relative path of audio file] [keyword 1] [keyword 2] ... [keyword n] [keyword_threshold]
+python3 Driver.py [relative path of audio file] [file with keywords] [keyword_threshold]
 """
 
 class Driver:
+
+    #PocketSphinx Decoder class object
+    dc = ps.Decoder
 
     #Setup class object
     setup = None
@@ -30,7 +33,7 @@ class Driver:
     file = None
 
     #List of NSS keywords to check
-    nss = []
+    nss = None
 
     #NSS threshold to check for
     threshold = None
@@ -42,15 +45,14 @@ class Driver:
     #checks to ensure that there are the correct number of CLA
     def check_argv(self):
         if len(sys.argv) < 4:
-            print("Error: Incorrect number of Command-Line Arguments: Should be at least 4, but was " + str(len(sys.argv)))
+            print("Error: Incorrect number of Command-Line Arguments: Should be 4, but was " + str(len(sys.argv)))
             return
 
     #convert CMA into local vars
     def update_argv(self):
         self.file = sys.argv[1]
-        for i in range(2, len(sys.argv) - 1):
-            self.nss.append(sys.argv[i])
-        self.threshold = sys.argv[len(sys.argv) - 1]
+        self.nss = sys.argv[2]
+        self.threshold = sys.argv[3]
 
     #see if the file path is valid
     def check_audio(self):
@@ -64,10 +66,10 @@ class Driver:
 
     #see if the keywords are parseable as a str
     def check_kw(self):
-        for i in range(0, self.nss.__len__()):
-            if not isinstance(self.nss[i], str):
-                print("Error: keyword " + str(i) + " is not of type string.\n")
-                return
+        if not type(self.nss) == str:
+            print("Error: keyword file is not a parseable string.\n")
+            return
+
 
     #see if the keyword threshold is a number and between 1e-1 and 1e-50
     def check_threshold(self):
@@ -86,13 +88,22 @@ class Driver:
         self.pre.detect_pause(self.setup.word_list)
 
         #Run separate NSS detection tests for each NSS
-        for i in range(0, self.nss.__len__()):
-            self.pre.detect_nss(self.file, self.nss[i], self.threshold)
+        self.pre.detect_nss(self.file, self.nss, self.threshold)
 
         self.pre.combine()
         self.pre.remove_dups()
         self.pre.sort_lists()
         self.pre.update_size()
+
+    #adds more dictionary definitions for NSS's for them to be more easily recognized
+    #defect, for now
+    def add_defs(self):
+        #self.dc.add_word('mm', 'M HH')
+        #self.dc.add_word("uh", "AH HH")
+        #self.dc.add_word("uh", "AO")
+        #self.dc.add_word("uh", "AO HH")
+        #self.dc.add_word("um", "AO M")
+        pass
 
     def output(self):
         print("Number of NSS sounds detected: " + str(self.pre.num_nss))
@@ -113,6 +124,7 @@ class Driver:
         self.check_audio()
         self.check_kw()
         self.check_threshold()
+        self.add_defs()
         self.init_pre()
         self.output()
 
