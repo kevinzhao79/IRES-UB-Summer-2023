@@ -90,6 +90,7 @@ class Driver:
         #Run separate NSS detection tests for each NSS
         self.pre.detect_nss(self.file, self.nss, self.threshold)
 
+        self.pre.pause_filter(50)
         self.pre.combine()
         self.pre.remove_dups()
         self.pre.sort_lists()
@@ -117,6 +118,13 @@ class Driver:
         string += "\n"
         print(string)
 
+    def __repr__(self):
+        string = "\n"
+        for word in self.pre.combined_transcription:
+            string += word.__repr__()
+        
+        return string
+
     #Handler function that calls all other driver functions
     def driver_handler(self):
         self.check_argv()
@@ -126,7 +134,9 @@ class Driver:
         self.check_threshold()
         self.add_defs()
         self.init_pre()
-        self.output()
+        #print(self.__repr__())
+        #self.output()
+        print(self.pre.nss_list)
 
 def main():
 
