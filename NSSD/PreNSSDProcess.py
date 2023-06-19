@@ -7,8 +7,13 @@ from Word import Word
 """Completes requirements for pre-NSSD processing, including detecting basic NSS's and pauses"""
 class PreNSSDProcess:
 
+     #PocketSphinx Config class object
      config = None
+
+     #PocketSphinx Decoder class object
      decoder = None
+
+     #PocketSphinx Segmenter class object
      segmenter = None
     
      #number of detectable pauses within the original transcription
@@ -32,6 +37,7 @@ class PreNSSDProcess:
      def __init__(self, word_list):
          self.word_list = word_list
 
+     #initializes the necessary PocketSphinx classes to perform STT
      def ps_settings(self, nss, threshold):
           self.config = ps.Config(
                fdict='nssd-dict.dict',
@@ -82,21 +88,24 @@ class PreNSSDProcess:
           self.wordify()
 
          
-     #filters thru find_all() output to determine whether the NSS was found within a word    
+     #filters through find_all() output to determine whether detected NSS's were true/false positives
      def nss_filter(self): 
 
-          #first filter of three
+          to_remove = set()
+
           nss_filtered_once = filter(self.first_filter, self.nss_list)
           for nss in nss_filtered_once:
-               self.nss_list.remove(nss)
+               to_remove.add(nss)
 
-          #second filter of three
           nss_filtered_twice = filter(self.second_filter, self.nss_list)
           for nss in nss_filtered_twice:
-               self.nss_list.remove(nss)
+               to_remove.add(nss)
 
           nss_filtered_thrice = filter(self.third_filter, self.nss_list)
           for nss in nss_filtered_thrice:
+               to_remove.add(nss)
+
+          for nss in to_remove:
                self.nss_list.remove(nss)
 
      #1. Grab start/end times of NSS to look through (repeat for all NSS in list)
@@ -108,13 +117,13 @@ class PreNSSDProcess:
           end = nss.end
 
           for word in self.word_list:
-               if abs(start - word.start) <= 10 and abs(end - word.end) <= 10:
+               if abs(start - word.start) <= 5 and abs(end - word.end) <= 5:
                     return True
 
-               elif abs(word.start - start) <= 10 and end < word.end:
+               elif abs(word.start - start) <= 5 and end < word.end:
                     return True
                
-               elif abs(word.end - end) <= 10 and start > word.start:
+               elif abs(word.end - end) <= 5 and start > word.start:
                     return True
 
           return False
@@ -126,18 +135,20 @@ class PreNSSDProcess:
 
           #current threshold: .10 seconds
           for word in self.nss_list:
-               if abs(word.start - start) <= 10 or abs(word.end - end) <= 10:
+               if abs(word.start - start) <= 5 or abs(word.end - end) <= 5:
                     return True
-          
+
           return False
 
      #filteres through all NSS's in the doubly filtered lists and removes impossibly short or unconfident ones.
      def third_filter(self, nss):
+
+          name = nss.name
           start = nss.start
           end = nss.end
           score = nss.score
-
-          if end - start <= 5 or score < 86:
+          #print("name: " + str(name) + "  start: " + str(start) + "  end: " + str(end) + "  score: " + str(score))
+          if end - start <= 10:
                return True
 
           return False
@@ -154,15 +165,14 @@ class PreNSSDProcess:
 
      #sorts nss and combined lists by start time, ascending
      def sort_lists(self):
-          self.nss_list.sort(key=lambda w: w.start)
-          self.combined_transcription.sort(key=lambda w: w.start)
+          self.nss_list.sort(key=lambda w: (w.start + w.end)/2)
+          self.combined_transcription.sort(key=lambda w: (w.start + w.end)/2)
 
      #Updates the number of NSS's in the combined transcription
      def update_size(self):
           for word in self.combined_transcription:
                if word.name == '<pause>':
                     self.num_pause += 1
-
           
           self.num_nss = self.nss_list.__len__() - self.num_pause
 

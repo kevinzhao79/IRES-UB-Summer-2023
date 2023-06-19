@@ -89,6 +89,7 @@ class Driver:
 
         #Run separate NSS detection tests for each NSS
         self.pre.detect_nss(self.file, self.nss, self.threshold)
+        #print(self.pre.nss_list)
 
         self.pre.pause_filter(50)
         self.pre.combine()
@@ -136,7 +137,6 @@ class Driver:
         self.init_pre()
         #print(self.__repr__())
         #self.output()
-        print(self.pre.nss_list)
 
 def main():
 
