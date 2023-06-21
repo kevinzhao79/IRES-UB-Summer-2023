@@ -135,7 +135,7 @@ class Driver:
         self.check_threshold()
         self.add_defs()
         self.init_pre()
-        #print(self.__repr__())        #prints full combined transcription data
+        print(self.__repr__())        #prints full combined transcription data
         #self.output()                 #prints readable combined transcription
         #print(self.pre.nss_list)      #prints out all nss data
 

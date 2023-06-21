@@ -136,13 +136,13 @@ class PreNSSDProcess:
           end = nss.end
 
           for word in self.word_list:
-               if abs(start - word.start) <= 3 and abs(end - word.end) <= 3:
+               if abs(start - word.start) <= 2 and abs(end - word.end) <= 2:
                     return True
 
-               elif abs(word.start - start) <= 1 and end < word.end:
+               elif abs(word.start - start) <= 2 and end < word.end:
                     return True
                
-               elif abs(word.end - end) <= 1 and start > word.start:
+               elif abs(word.end - end) <= 2 and start > word.start:
                     return True
 
           return False
