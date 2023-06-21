@@ -56,7 +56,21 @@ class PreNSSDProcess:
                for seg in self.decoder.seg():
                     new_word = Word(seg.word, seg.start_frame, seg.end_frame, seg.prob)
                     self.nss_list.append(new_word)
-            
+
+          self.word_list_filter()
+
+     #Gets rid of unnecessary items from the initial PS transcription
+     def word_list_filter(self):
+
+          to_remove = []
+
+          for word in self.word_list:
+               if word.name == "<s>" or word.name == "[SPEECH]" or word.name == "</s>":
+                    to_remove.append(word)
+
+          for word in to_remove:
+               self.word_list.remove(word)
+
      """determines total num of pauses within the original transcription"""
      def detect_pause(self, word_list):
         for unit in word_list:
@@ -97,13 +111,19 @@ class PreNSSDProcess:
           for nss in nss_filtered_once:
                to_remove.add(nss)
 
+          print(to_remove.__len__())
+
           nss_filtered_twice = filter(self.second_filter, self.nss_list)
           for nss in nss_filtered_twice:
                to_remove.add(nss)
 
+          print(to_remove.__len__())
+
           nss_filtered_thrice = filter(self.third_filter, self.nss_list)
           for nss in nss_filtered_thrice:
                to_remove.add(nss)
+
+          print(to_remove.__len__())
 
           for nss in to_remove:
                self.nss_list.remove(nss)
@@ -117,13 +137,13 @@ class PreNSSDProcess:
           end = nss.end
 
           for word in self.word_list:
-               if abs(start - word.start) <= 5 and abs(end - word.end) <= 5:
+               if abs(start - word.start) <= 3 and abs(end - word.end) <= 3:
                     return True
 
-               elif abs(word.start - start) <= 5 and end < word.end:
+               elif abs(word.start - start) <= 1 and end < word.end:
                     return True
                
-               elif abs(word.end - end) <= 5 and start > word.start:
+               elif abs(word.end - end) <= 1 and start > word.start:
                     return True
 
           return False
@@ -132,10 +152,11 @@ class PreNSSDProcess:
      def second_filter(self, nss):
           start = nss.start
           end = nss.end
+          score = nss.score
 
           #current threshold: .10 seconds
           for word in self.nss_list:
-               if abs(word.start - start) <= 5 or abs(word.end - end) <= 5:
+               if (abs(word.start - start) <= 3 or abs(word.end - end) <= 3) and score < word.score:
                     return True
 
           return False
@@ -148,7 +169,7 @@ class PreNSSDProcess:
           end = nss.end
           score = nss.score
           #print("name: " + str(name) + "  start: " + str(start) + "  end: " + str(end) + "  score: " + str(score))
-          if end - start <= 10:
+          if end - start <= 3 or score < 86:
                return True
 
           return False

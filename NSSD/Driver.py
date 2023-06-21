@@ -136,7 +136,8 @@ class Driver:
         self.add_defs()
         self.init_pre()
         #print(self.__repr__())
-        #self.output()
+        self.output()
+        #print(self.pre.nss_list.__len__())
 
 def main():
 
