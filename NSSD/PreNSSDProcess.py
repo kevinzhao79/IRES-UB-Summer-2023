@@ -34,6 +34,7 @@ class PreNSSDProcess:
      #combination of double_filtered_nss and word_lst
      combined_transcription = []
 
+     #Takes word list from NSSD.Setup class
      def __init__(self, word_list):
          self.word_list = word_list
 
@@ -50,6 +51,7 @@ class PreNSSDProcess:
           self.decoder = ps.Decoder(self.config)
           self.segmenter = ps.Segmenter(sample_rate=16000, frame_length=0.01)
 
+     #Converts segments created by ps.Decoder into NSSD.Word objects usable by the class
      def wordify(self):
 
           if self.decoder.hyp() != None:
@@ -71,7 +73,7 @@ class PreNSSDProcess:
           for word in to_remove:
                self.word_list.remove(word)
 
-     """determines total num of pauses within the original transcription"""
+     #determines total num of pauses within the original transcription
      def detect_pause(self, word_list):
         for unit in word_list:
           if unit.name == "<sil>":
@@ -96,8 +98,6 @@ class PreNSSDProcess:
                          break
                self.decoder.end_utt()  # End utterance
 
-          #self.nss_transcription = self.segmenter.segment(self.nss_transcription)
-
           #turns segmented output into list form
           self.wordify()
 
@@ -105,33 +105,32 @@ class PreNSSDProcess:
      #filters through find_all() output to determine whether detected NSS's were true/false positives
      def nss_filter(self): 
 
+          #after each filter, add all elements to be removed
+          #to this set and remove them at the end
           to_remove = set()
 
           nss_filtered_once = filter(self.first_filter, self.nss_list)
           for nss in nss_filtered_once:
                to_remove.add(nss)
 
-          print(to_remove.__len__())
+          #print(to_remove.__len__())
 
           nss_filtered_twice = filter(self.second_filter, self.nss_list)
           for nss in nss_filtered_twice:
                to_remove.add(nss)
 
-          print(to_remove.__len__())
+          #print(to_remove.__len__())
 
           nss_filtered_thrice = filter(self.third_filter, self.nss_list)
           for nss in nss_filtered_thrice:
                to_remove.add(nss)
 
-          print(to_remove.__len__())
+          #print(to_remove.__len__())
 
           for nss in to_remove:
                self.nss_list.remove(nss)
 
-     #1. Grab start/end times of NSS to look through (repeat for all NSS in list)
-     #2. Loop through transcription list to check if any words fall into that range
-     #3. If so, then the NSS is invalid, and vice versa
-     #4. Output all valid NSS into the filtered list
+     #filters through and removes NSS's that were detected within other words
      def first_filter(self, nss):
           start = nss.start
           end = nss.end
@@ -149,6 +148,8 @@ class PreNSSDProcess:
           return False
 
      #filters through all NSS's in the initial filtered list, and removes any 'duplicate' NSS's
+     #a.k.a. sounds that were recognized as multiple NSS's by the program will only be recognized
+     #as the NSS with the best accuracy over the sound's time frame
      def second_filter(self, nss):
           start = nss.start
           end = nss.end
@@ -161,14 +162,12 @@ class PreNSSDProcess:
 
           return False
 
-     #filteres through all NSS's in the doubly filtered lists and removes impossibly short or unconfident ones.
+     #filteres through all NSS's and removes impossibly short or low confidence ones.
      def third_filter(self, nss):
 
-          name = nss.name
           start = nss.start
           end = nss.end
           score = nss.score
-          #print("name: " + str(name) + "  start: " + str(start) + "  end: " + str(end) + "  score: " + str(score))
           if end - start <= 3 or score < 86:
                return True
 
@@ -195,13 +194,13 @@ class PreNSSDProcess:
                if word.name == '<pause>':
                     self.num_pause += 1
           
-          self.num_nss = self.nss_list.__len__() - self.num_pause
+          self.num_nss = self.nss_list.__len__()
 
      #removes all detected pauses below the time threshold (default = 0.50 seconds)
      def pause_filter(self, threshold):
 
           if type(threshold) != int or type(threshold) != float:
-               threshold = 50
+               threshold = 25
 
           word_list_copy = self.word_list.copy()
           for word in word_list_copy:
