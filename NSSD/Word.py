@@ -34,6 +34,6 @@ class Word:
         return self.score
 
     def __repr__(self):
-        return f"Word: {self.name}, Time: {self.start/100}s - {self.end/100}s, Confidence: {self.score}\n"
+        return f"Word: {self.name}, Time: {self.start/100}s - {self.end/100}s, Score: {self.score}\n"
 
     

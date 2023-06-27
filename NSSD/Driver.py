@@ -11,7 +11,7 @@ from PreNSSDProcess import PreNSSDProcess
 
 """
 The Driver class, responsible for initializing the backend classes (Setup, PreNSSDPRocess),
-checking user-inputted arguments, and abstracting the process to simplify user interaction.
+checking user-inputted arguments, outputting one of several text outputs (defined below).
 
 The Command Line Arguments for this program are detailed as follows:
 
@@ -135,8 +135,8 @@ class Driver:
         self.check_threshold()
         self.add_defs()
         self.init_pre()
-        print(self.__repr__())        #prints full combined transcription data
-        #self.output()                 #prints readable combined transcription
+        #print(self.__repr__())        #prints full combined transcription data
+        self.output()                 #prints readable combined transcription
         #print(self.pre.nss_list)      #prints out all nss data
 
 def main():
@@ -144,4 +144,5 @@ def main():
     driver = Driver(Setup, PreNSSDProcess)
     driver.driver_handler()
 
-main()
+main()                                                                                                                #first pass
+#pocketsphinx align [relative path of audio file] [first pass transcription] | jq '.w[]|.t' > [output text file]      #second pass
