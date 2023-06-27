@@ -20,8 +20,14 @@ python3 Driver.py [relative path of audio file] [file with keywords] [keyword_th
 
 class Driver:
 
+    align_text = "i thought there was something you know severely wrong with me and wrong with my brain um  and that was creating more anxiety for me because you know i would like become aware that i was feeling weird and you know was feeling not right in my brain and then that would create more anxiety"
+
     #PocketSphinx Decoder class object
     dc = ps.Decoder
+
+    setup_dc = None
+
+    config = None
 
     #Setup class object
     setup = None
@@ -53,16 +59,34 @@ class Driver:
         self.file = sys.argv[1]
         self.nss = sys.argv[2]
         self.threshold = sys.argv[3]
+        self.config = ps.Config(
+               fdict='nssd-dict.dict',
+               frate=100,
+               silprob=.001,
+               fillprob=.001,
+               kws = self.nss,
+               kws_delay=100,
+               kws_plp=1,
+               kws_threshold = self.threshold
+          )
 
     #see if the file path is valid
     def check_audio(self):
-        try:
-            audio = AudioFile(self.file)
-            self.setup.transcribe(audio)
-            self.setup.separate(self.setup.ts_transcription)
-        except:
-            print("Error: audio file path invalid.\n")
-            return
+
+        self.setup_dc = ps.Decoder(self.config)
+
+        with open(self.file, 'rb') as f:
+               self.setup_dc.set_align_text(self.align_text)
+               self.setup_dc.start_utt()  # Begin utterance
+               while True:
+                    buf = f.read(1024)
+                    if buf:
+                         self.setup_dc.process_raw(buf, False, False)
+                    else:
+                         break
+               self.setup_dc.end_utt()  # End utterance
+
+        self.setup.transcribe(self.setup_dc.seg())
 
     #see if the keywords are parseable as a str
     def check_kw(self):

@@ -91,7 +91,7 @@ class PreNSSDProcess:
           self.ps_settings(nss, threshold)
 
           with open(file, 'rb') as f:
-               self.decoder.set_align_text(self.align_text)
+               #self.decoder.set_align_text(self.align_text)
                self.decoder.start_utt()  # Begin utterance
                while True:
                     buf = f.read(1024)
@@ -112,25 +112,23 @@ class PreNSSDProcess:
           #to this set and remove them at the end
           to_remove = set()
 
-          print(self.nss_list)
-
           nss_filtered_once = filter(self.first_filter, self.nss_list)
           for nss in nss_filtered_once:
                to_remove.add(nss)
 
-          print(to_remove.__len__())
+          #print(to_remove.__len__())
 
           nss_filtered_twice = filter(self.second_filter, self.nss_list)
           for nss in nss_filtered_twice:
                to_remove.add(nss)
 
-          print(to_remove.__len__())
+          #print(to_remove.__len__())
 
           nss_filtered_thrice = filter(self.third_filter, self.nss_list)
           for nss in nss_filtered_thrice:
                to_remove.add(nss)
 
-          print(to_remove.__len__())
+          #print(to_remove.__len__())
 
           for nss in to_remove:
                self.nss_list.remove(nss)
@@ -177,7 +175,7 @@ class PreNSSDProcess:
           start = nss.start
           end = nss.end
           score = nss.score
-          if score < 86.5:
+          if score <= 86.2:
                return True
 
           return False
