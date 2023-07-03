@@ -133,21 +133,15 @@ class PreNSSDProcess:
           for nss in to_remove:
                self.nss_list.remove(nss)
 
-     #filters through and removes NSS's that were detected within other words
+     #filters through and removes NSS's that have the same phoneme translation as words in the same time frame
      def first_filter(self, nss):
           start = nss.start
           end = nss.end
 
-          return False         #essentially disables this filter
+          #return False         #essentially disables this filter
 
           for word in self.word_list:
-               if abs(start - word.start) <= 1 and abs(end - word.end) <= 1:
-                    return True
-
-               elif abs(word.start - start) <= 1 and end < word.end:
-                    return True
-               
-               elif abs(word.end - end) <= 1 and start > word.start:
+               if (abs(start - word.start) <= 1 and abs(end - word.end) <= 1) or (abs(word.start - start) <= 1 and end < word.end) or (abs(word.end - end) <= 1 and start > word.start):
                     return True
 
           return False
@@ -175,7 +169,7 @@ class PreNSSDProcess:
           start = nss.start
           end = nss.end
           score = nss.score
-          if score <= 86.2:
+          if score <= 86.3:
                return True
 
           return False

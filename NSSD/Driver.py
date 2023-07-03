@@ -20,8 +20,7 @@ python3 Driver.py [relative path of audio file] [file with keywords] [keyword_th
 
 class Driver:
 
-    align_text = "i thought there was something you know severely wrong with me and wrong with my brain um  and that was creating more anxiety for me because you know i would like become aware that i was feeling weird and you know was feeling not right in my brain and then that would create more anxiety"
-
+    align_text = "i don't really know about that one i will get back to you regarding that sometime late today"
     #PocketSphinx Decoder class object
     dc = ps.Decoder
 
@@ -159,8 +158,8 @@ class Driver:
         self.check_threshold()
         self.add_defs()
         self.init_pre()
-        #print(self.__repr__())        #prints full combined transcription data
-        self.output()                 #prints readable combined transcription
+        print(self.__repr__())        #prints full combined transcription data
+        #self.output()                 #prints readable combined transcription
         #print(self.pre.nss_list)      #prints out all nss data
 
 def main():
