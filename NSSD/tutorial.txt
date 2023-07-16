@@ -1,11 +1,11 @@
-Whisper installation:
+Install all packages (make sure in virtual environment first):
+python -m pip install -r requirements.txt
 
-https://github.com/openai/whisper
+NOTE: Anytime you add a package through pip/homebrew, run the following command to add that package to the requirements list:
+python -m pip freeze > requirements.txt
 
 Using Whisper in commandline:
-
 whisper <relative path of audio file> --model <model> --initial-prompt <prompt, encased in quotes>
 
-example:
-
+Example:
 whisper ../audio/1.wav --model tiny.en --initial-prompt "um uh"
