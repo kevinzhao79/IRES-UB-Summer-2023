@@ -1,0 +1,11 @@
+Whisper installation:
+
+https://github.com/openai/whisper
+
+Using Whisper in commandline:
+
+whisper <relative path of audio file> --model <model> --initial-prompt <prompt, encased in quotes>
+
+example:
+
+whisper ../audio/1.wav --model tiny.en --initial-prompt "um uh"
